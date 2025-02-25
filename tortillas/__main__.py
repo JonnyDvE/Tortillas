@@ -102,6 +102,8 @@ def main():
         "-r 2 will run all tests 2 times",
         default=1,
     )
+    parser.add_argument("-o", "--output",type=str, help="if set outputs a junit xml file with the specified name")
+
 
     args = parser.parse_args()
 
@@ -147,6 +149,9 @@ def main():
     log.info(summary)
 
     logging.shutdown()
+    if(args.output):
+        test_runner.write_junit_xml(args.output)
+
     sys.exit(not test_runner.success)
 
 

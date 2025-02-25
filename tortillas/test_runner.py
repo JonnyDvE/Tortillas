@@ -1,12 +1,15 @@
 """This modules contains the top level interface for running tests."""
 
 from __future__ import annotations
+
+from collections import defaultdict
 from typing import Any, Callable
 
 import sys
 import time
 import threading
 import subprocess
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from .utils import get_logger
@@ -25,6 +28,7 @@ class TestRun:
     """
 
     def __init__(self, test_spec: TestSpec, num: int, config: TortillasConfig):
+        self.runtime = float(-1)
         self.name = test_spec.test_name
         self.run_number = num
         self.spec = test_spec
@@ -33,7 +37,6 @@ class TestRun:
 
         self.config = config
         self.result = TestResult(TestStatus.NOT_RUN)
-
         tmp_dir_name = repr(self).lower().replace(" ", "-")
         self.tmp_dir = TEST_RUN_DIR / tmp_dir_name
 
@@ -258,6 +261,58 @@ class TestRunner:
 
         return summary
 
+    def write_junit_xml(self, output):
+        tree = self.generate_junit_xml()
+        xml_string = ET.tostring(tree, encoding="unicode", xml_declaration=True)
+
+        with open(output, "w") as file:  # Use 'wb' to write in binary mode
+            file.write(xml_string)  # Add encoding and XML declaration
+
+
+    def generate_junit_xml(self):
+        # Root element: <testsuite>
+
+        testsuites = ET.Element("testsuites", {
+            "name": "AllTests",
+            "tests": str(len(self.test_runs)),
+            "time" : f"{sum(result.runtime for result in self.test_runs):.3f}",
+            "failures": str(sum(1 for result in self.test_runs if result.result == TestStatus.FAILED))
+        })
+        tests_by_category = defaultdict(list)
+        for test in self.test_runs:
+            category = test.spec.category
+            tests_by_category[category].append(test)
+
+
+        for category, tests_in_category in tests_by_category.items():
+        # Create <testsuite> for each category
+            testsuite = ET.SubElement(testsuites,"testsuite", {
+                "name": category,
+                "tests": str(len(tests_in_category)),
+                "time" : f"{sum(result.runtime for result in tests_in_category):.3f}",
+                "failures": str(sum(1 for result in tests_in_category if is_failed_test(result) ))
+            })
+
+            for test in tests_in_category:
+            # Create <testcase> for each test within the category
+                testcase = ET.SubElement(testsuite, "testcase", {
+                    "name": test.spec.test_name,
+                    "time": f"{test.runtime:.3f}"
+                })
+                if is_failed_test(test) and test.result.errors is not None:
+                    # Add a <failure> tag if the test failed
+                    failure = ET.SubElement(testcase, "failure", {
+                        "message": "\n".join(test.result.errors),
+                        "type": test.result.status.name
+                    }, )
+                    failure.text = "\n".join(test.result.errors)
+        return testsuites
+
+
+def is_failed_test(test):
+    return test.result.status in {TestStatus.FAILED, TestStatus.TIMEOUT, TestStatus.PANIC}
+
+
 
 def _create_snapshot(architecture: str, label: str, config: TortillasConfig):
     log = get_logger("Create snapshot", prefix=True)
@@ -350,7 +405,6 @@ def _run(
     log.debug(f"Starting qemu snapshot {QEMU_VMSTATE_TAG} (arch={architecture})")
 
     status: InterruptWatchdog.Status
-
     with QemuInterface(
         tmp_dir=tmp_dir,
         qcow2_path=snapshot_path,
@@ -365,6 +419,7 @@ def _run(
             return
 
         log.info("Starting test execution")
+        start_time = time.time_ns()
         qemu.sweb_input(f"{test.name}.sweb\n")
 
         timeout = config.default_test_timeout_secs
@@ -378,7 +433,7 @@ def _run(
             int_regs={return_reg: config.sc_tortillas_finished},
             timeout=timeout,
         )
-
+        test.runtime = (time.time_ns() - start_time) / 1000000000.0
         # Wait a bit for cleanup and debug output to be flushed
         time.sleep(1)
         # analyze before exiting the shell, to keep exit codes intact
@@ -389,6 +444,7 @@ def _run(
         time.sleep(1)
 
     log.info("Done!")
+
     if callback:
         callback(test)
 
