@@ -150,7 +150,7 @@ def main():
 
     logging.shutdown()
     if(args.output):
-        test_runner.write_junit_xml(args.output)
+        test_runner.write_junit_xml(sweb_src_folder / args.output)
 
     sys.exit(not test_runner.success)
 

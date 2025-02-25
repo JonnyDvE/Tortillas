@@ -265,7 +265,7 @@ class TestRunner:
         tree = self.generate_junit_xml()
         xml_string = ET.tostring(tree, encoding="unicode", xml_declaration=True)
 
-        with open(output, "w") as file:  # Use 'wb' to write in binary mode
+        with open( output, "w") as file:  # Use 'wb' to write in binary mode
             file.write(xml_string)  # Add encoding and XML declaration
 
 
