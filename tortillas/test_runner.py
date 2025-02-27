@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from string import capwords
 
-from pybadges import badge
+
 
 from collections import defaultdict
 from typing import Any, Callable
@@ -313,7 +313,14 @@ class TestRunner:
         return testsuites
 
     def write_badges(self, sweb_src_folder):
-
+        try:
+            from pybadges import badge
+        except ImportError:
+            get_logger("default").info(
+                "Badges not generated, missing pybadges\n"
+                "   pip3 install pybadges\n"
+            )
+            return
 
         with open(f"{sweb_src_folder}/badges/tests.svg", "w") as file:  # Use 'wb' to write in binary mode
             file.write(badge(left_text="Tests", right_text=f"{ sum(1 for test in self.test_runs if not is_failed_test(test))}/{len(self.test_runs)}",
@@ -328,12 +335,12 @@ class TestRunner:
             passed = sum(1 for result in tests_in_category if not is_failed_test(result))
             total = len(tests_by_category[category])
             with open(f"{sweb_src_folder}/badges/{category}.svg", "w") as file:  # Use 'wb' to write in binary mode
-                file.write(badge(left_text=capwords(category) , right_text=f"{passed}/{total}", right_color=getColorByPercentage(passed, total)))  # Add encoding and XML declaration
+                file.write(badge(left_text=category, right_text=f"{passed}/{total}", right_color=getColorByPercentage(passed, total)))  # Add encoding and XML declaration
 
 def getColorByPercentage(passeded: int, total: int) -> str:
     if float(total)/passeded == 1:
         return "green"
-    elif float(total)/passeded > 80:
+    elif float(total)/passeded >= 0.5:
         return "yellow"
     else:
         return "red"
