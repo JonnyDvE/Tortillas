@@ -135,7 +135,7 @@ def main():
                 return
             mkdir(f"{sweb_src_folder}/badges")
             for category in args.category:
-                with open(f"{sweb_src_folder}/badges/{args}.svg", "w") as file:  # Use 'wb' to write in binary mode
+                with open(f"{sweb_src_folder}/badges/{category}.svg", "w") as file:  # Use 'wb' to write in binary mode
                     file.write(badge(left_text=category, right_text=f"No Tests", right_color="blue"))
         sys.exit(0)
 
