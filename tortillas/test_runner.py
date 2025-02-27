@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from os import mkdir
 from string import capwords
 
 
@@ -321,7 +322,8 @@ class TestRunner:
                 "   pip3 install pybadges\n"
             )
             return
-
+        mkdir(sweb_src_folder)
+        mkdir(f"{sweb_src_folder}/badges")
         with open(f"{sweb_src_folder}/badges/tests.svg", "w") as file:  # Use 'wb' to write in binary mode
             file.write(badge(left_text="Tests", right_text=f"{ sum(1 for test in self.test_runs if not is_failed_test(test))}/{len(self.test_runs)}",
                              right_color=getColorByPercentage( sum(1 for test in self.test_runs if not is_failed_test(test)), len(self.test_runs))))  # Add encoding and XML declaration

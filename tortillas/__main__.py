@@ -1,6 +1,8 @@
 """Parse arguments, make a qemu snapshot of SWEB and run applicable tests."""
 
 from __future__ import annotations
+
+from os import mkdir
 from pathlib import Path
 
 import argparse
@@ -131,6 +133,7 @@ def main():
                     "   pip3 install pybadges\n"
                 )
                 return
+            mkdir(f"{sweb_src_folder}/badges")
             for category in args.category:
                 with open(f"{sweb_src_folder}/badges/{args}.svg", "w") as file:  # Use 'wb' to write in binary mode
                     file.write(badge(left_text=category, right_text=f"No Tests", right_color="blue"))
