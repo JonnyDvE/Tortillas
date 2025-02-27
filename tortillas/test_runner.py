@@ -322,7 +322,6 @@ class TestRunner:
                 "   pip3 install pybadges\n"
             )
             return
-        mkdir(sweb_src_folder)
         mkdir(f"{sweb_src_folder}/badges")
         with open(f"{sweb_src_folder}/badges/tests.svg", "w") as file:
             file.write(badge(left_text="Tests", right_text=f"{ sum(1 for test in self.test_runs if not is_failed_test(test))}/{len(self.test_runs)}",
