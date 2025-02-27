@@ -121,8 +121,20 @@ def main():
     all_specs = get_test_specs(sweb_src_folder, args.glob)
     selected_specs = filter_test_specs(all_specs, args.category, args.tag)
     if len(selected_specs) == 0:
-        log.error("No test specs were found")
-        sys.exit(1)
+        log.error("No test specs were found, skipping tests.") # CICD jobs shouldnt fail if there are no tests
+        if(args.badges):
+            try:
+                from pybadges import badge
+            except ImportError:
+                get_logger("default").info(
+                    "Badges not generated, missing pybadges\n"
+                    "   pip3 install pybadges\n"
+                )
+                return
+            for category in args.category:
+                with open(f"{sweb_src_folder}/badges/{args}.svg", "w") as file:  # Use 'wb' to write in binary mode
+                    file.write(badge(left_text=category, right_text=f"No Tests", right_color="blue"))
+        sys.exit(0)
 
     test_runner = TestRunner(
         selected_specs, args.repeat, args.arch, config, progress_bar
