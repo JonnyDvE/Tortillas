@@ -324,7 +324,7 @@ class TestRunner:
             return
         mkdir(sweb_src_folder)
         mkdir(f"{sweb_src_folder}/badges")
-        with open(f"{sweb_src_folder}/badges/tests.svg", "w") as file:  # Use 'wb' to write in binary mode
+        with open(f"{sweb_src_folder}/badges/tests.svg", "w") as file:
             file.write(badge(left_text="Tests", right_text=f"{ sum(1 for test in self.test_runs if not is_failed_test(test))}/{len(self.test_runs)}",
                              right_color=getColorByPercentage( sum(1 for test in self.test_runs if not is_failed_test(test)), len(self.test_runs))))  # Add encoding and XML declaration
 
@@ -336,7 +336,7 @@ class TestRunner:
         for category, tests_in_category in tests_by_category.items():
             passed = sum(1 for result in tests_in_category if not is_failed_test(result))
             total = len(tests_by_category[category])
-            with open(f"{sweb_src_folder}/badges/{category}.svg", "w") as file:  # Use 'wb' to write in binary mode
+            with open(f"{sweb_src_folder}/badges/{category}.svg", "w") as file:
                 file.write(badge(left_text=category, right_text=f"{passed}/{total}", right_color=getColorByPercentage(passed, total)))  # Add encoding and XML declaration
 
 def getColorByPercentage(passeded: int, total: int) -> str:
