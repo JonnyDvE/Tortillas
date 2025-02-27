@@ -103,6 +103,8 @@ def main():
         default=1,
     )
     parser.add_argument("-o", "--output",type=str, help="if set outputs a junit xml file with the specified name")
+    parser.add_argument("-b", "--badges",action="store_true", help="if set outputs a badge for all tested categories successful build and a all tests badge for all tested tests"
+                        "<category>.svg and test.svg will be created in ./badges/")
 
 
     args = parser.parse_args()
@@ -149,9 +151,10 @@ def main():
     log.info(summary)
 
     logging.shutdown()
-    if(args.output):
+    if args.output:
         test_runner.write_junit_xml(sweb_src_folder / args.output)
-
+    if args.badges:
+        test_runner.write_badges(sweb_src_folder)
     sys.exit(not test_runner.success)
 
 
