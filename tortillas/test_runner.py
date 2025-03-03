@@ -322,7 +322,10 @@ class TestRunner:
                 "   pip3 install pybadges\n"
             )
             return
-        mkdir(f"{sweb_src_folder}/badges")
+        try:
+            mkdir(f"{sweb_src_folder}/badges")
+        except FileExistsError:
+            pass
         with open(f"{sweb_src_folder}/badges/tests.svg", "w") as file:
             file.write(badge(left_text="Tests", right_text=f"{ sum(1 for test in self.test_runs if not is_failed_test(test))}/{len(self.test_runs)}",
                              right_color=getColorByPercentage( sum(1 for test in self.test_runs if not is_failed_test(test)), len(self.test_runs))))  # Add encoding and XML declaration
