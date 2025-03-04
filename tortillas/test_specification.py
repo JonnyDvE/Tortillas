@@ -16,7 +16,7 @@ def get_test_specs(sweb_src_folder: Path, test_glob: str) -> list[TestSpec]:
     Gets all TestSpecs (yaml test headers) that can be found at
     `sweb_src_folder/TEST_FOLDER_PATH/{test_glob}.c`
     """
-    file_paths = list((sweb_src_folder / TEST_FOLDER_PATH).glob(f"{test_glob}.c"))
+    file_paths = list((sweb_src_folder / TEST_FOLDER_PATH).rglob(f"{test_glob}.c"))
 
     specs = []
     for file_path in file_paths:
