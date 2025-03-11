@@ -342,6 +342,8 @@ class TestRunner:
                 file.write(badge(left_text=category, right_text=f"{passed}/{total}", right_color=getColorByPercentage(passed, total)))  # Add encoding and XML declaration
 
 def getColorByPercentage(passeded: int, total: int) -> str:
+    if passeded == 0:
+        return "red"
     if float(total)/passeded == 1:
         return "green"
     elif float(total)/passeded >= 0.5:
