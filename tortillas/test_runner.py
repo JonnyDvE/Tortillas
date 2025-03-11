@@ -460,6 +460,7 @@ def _run(
 
         log.info("Starting test execution")
         start_time = time.time_ns()
+        qemu.sweb_input(f"kbm en\n")
         qemu.sweb_input(f"test.sweb\n")
         qemu.sweb_input(f"{test.name}\n")
 
