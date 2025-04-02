@@ -81,6 +81,8 @@ class TestSpec:
 
     tags: list[str] | None = None
 
+    expect_stdout: str = None
+
     def __init__(self, test_name: str, test_src_path: Path):
         """:raises: NoTestSpecFound: `yaml.safe_loads` failed"""
         self.test_name = test_name
