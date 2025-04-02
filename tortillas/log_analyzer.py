@@ -47,26 +47,21 @@ class TestResult:
 
         self._set_status(status)
 
-    def check_expect_stdout(self, logs: list[str], status: TestStatus | None = None):
+    def check_expect_stdout(self, logs: list[str], test_spec: TestSpec, status: TestStatus | None = None):
         """Handle config mode `expect_stdout`, set `status`, if supplied."""
-        missing_output = False
+        if not test_spec.expect_stdout:
+            return
 
-        stdout = [line for line in logs if not line.startswith(TORTILLAS_EXPECT_PREFIX)]
+        actual_stdout = [line[len(TORTILLAS_EXPECT_PREFIX):-2] for line in logs if line.startswith(TORTILLAS_EXPECT_PREFIX)]
 
-        expect_stdout = (
-            line[len(TORTILLAS_EXPECT_PREFIX) - 1 :]
-            for line in logs
-            if line.startswith(TORTILLAS_EXPECT_PREFIX)
-        )
+        expect_stdout = test_spec.expect_stdout.splitlines()
 
-        for expect in expect_stdout:
-            if not any((expect.strip() in got for got in stdout)):
-                self.errors.append(f"Expected output: {expect}")
-                missing_output = True
+        actual = repr('\n'.join(actual_stdout))
+        expected = repr('\n'.join(expect_stdout))
 
-        if missing_output:
-            full_stdout = "".join(line for line in stdout)
-            self.errors.append(f"Actual output:\n```\n{full_stdout}\n```")
+        if actual != expected:
+            self.errors.append(f"Expected output:\n{expected}")
+            self.errors.append(f"Actual output:\n{actual}")
             self._set_status(status)
 
     def check_exit_codes(
@@ -162,7 +157,7 @@ class LogAnalyzer:
                 result.retry = True
 
             elif config_entry.mode == "expect_stdout":
-                result.check_expect_stdout(logs, status)
+                result.check_expect_stdout(logs, self.test_spec, status)
 
             elif config_entry.mode == "exit_codes":
                 result.check_exit_codes(
