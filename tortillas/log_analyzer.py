@@ -52,12 +52,10 @@ class TestResult:
         if not test_spec.expect_stdout:
             return
 
-        actual_stdout = [line[len(TORTILLAS_EXPECT_PREFIX):-2] for line in logs if line.startswith(TORTILLAS_EXPECT_PREFIX)]
+        actual_stdout = [line[len(TORTILLAS_EXPECT_PREFIX):-1] for line in logs if line.startswith(TORTILLAS_EXPECT_PREFIX)]
 
-        expect_stdout = test_spec.expect_stdout.splitlines()
-
-        actual = repr('\n'.join(actual_stdout))
-        expected = repr('\n'.join(expect_stdout))
+        actual = repr(''.join(actual_stdout))
+        expected = repr(test_spec.expect_stdout)
 
         if actual != expected:
             self.errors.append(f"Expected output:\n{expected}")
