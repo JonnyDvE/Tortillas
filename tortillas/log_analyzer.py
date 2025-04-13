@@ -52,9 +52,14 @@ class TestResult:
         if not test_spec.expect_stdout:
             return
 
-        actual_stdout = [line[len(TORTILLAS_EXPECT_PREFIX):-2] if i == len(logs) - 1
-                         else line[len(TORTILLAS_EXPECT_PREFIX):-1]
-                         for i, line in enumerate(logs) if line.startswith(TORTILLAS_EXPECT_PREFIX)]
+        actual_stdout = []
+        for i, line in enumerate(logs):
+            if not line.startswith(TORTILLAS_EXPECT_PREFIX):
+                continue
+            if i == len(logs) - 1:
+                actual_stdout.append(line[len(TORTILLAS_EXPECT_PREFIX):-2])
+            else:
+                actual_stdout.append(line[len(TORTILLAS_EXPECT_PREFIX):-1])
 
         actual = repr(''.join(actual_stdout))
         expected = repr(test_spec.expect_stdout)
