@@ -164,7 +164,7 @@ class LogAnalyzer:
             elif config_entry.mode == "expect_stdout":
                 result.check_expect_stdout(logs, self.test_spec, status)
 
-            elif config_entry.mode == "exit_codes":
+            elif config_entry.mode == "exit_codes" and not self.test_spec.expect_timeout:
                 result.check_exit_codes(
                     logs, self.test_spec.expect_exit_codes or [0], status
                 )
